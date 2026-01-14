@@ -13,7 +13,10 @@ import 'package:automaat/main.dart';
 void main() {
   testWidgets('Counter increments smoke test', (WidgetTester tester) async {
     // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+    await tester.pumpWidget(const AutoMaatApp());
+
+    // Controle: splash‑tekst moet zichtbaar zijn.
+    expect(find.text('RIDE IN LUXURY'), findsOneWidget);
 
     // Verify that our counter starts at 0.
     expect(find.text('0'), findsOneWidget);
