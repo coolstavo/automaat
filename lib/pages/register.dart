@@ -2,11 +2,10 @@ import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
 import '../theme/logo_widget.dart';
 import '../theme/constants.dart';
-import 'login_page.dart';
+import 'login.dart';
 
 /// Registratie‑scherm dat `/api/AM/register` aanroept.
-///
-/// Maakt zowel een technisch USER‑account als een CUSTOMER in de backend.
+
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
 
