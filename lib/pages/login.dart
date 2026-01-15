@@ -1,10 +1,9 @@
-// pages/login_page.dart
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
 import '../theme/logo_widget.dart';
 import '../theme/constants.dart';
-import 'register_page.dart';
-import 'home_page.dart';
+import 'register.dart';
+import 'home.dart';
 
 /// Login-scherm dat praat met `/api/authenticate`.
 class LoginPage extends StatefulWidget {

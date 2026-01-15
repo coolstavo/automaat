@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'theme/app_theme.dart';
-import 'pages/splash_page.dart';
-import 'pages/login_page.dart';
-import 'pages/register_page.dart';
+import 'pages/splash.dart';
+import 'pages/login.dart';
+import 'pages/register.dart';
 
 /// Entry‑point van de AutoMaat app.
 void main() {

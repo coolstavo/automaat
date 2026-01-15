@@ -1,33 +1,50 @@
-// pages/home_page.dart
 import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 
 import '../services/car_service.dart';
+import '../services/favorites_service.dart';
 import '../theme/logo_widget.dart';
+import 'car_details.dart';
+import 'favorites.dart';
+import 'profile.dart';
+import 'search.dart';
 
-/// Home-scherm: bevat de logo, headertekst, car-cards en bottom navigation.
-/// Maakt gebruik van echte data uit /api/cars
+/// Haalt data uit /api/cars.
+
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
   @override
   State<HomePage> createState() => _HomePageState();
 }
-// per pagina max 10 auto's weergeven.
+
+// Per pagina max 10 auto's weergeven.
 class _HomePageState extends State<HomePage> {
   int _currentIndex = 0;
   int _currentPage = 0;
   static const int _pageSize = 10;
 
-  //  Stelt de toekomstige lijst met auto‑data' voor die pas later uit de API‑call komt.
   late Future<List<Map<String, dynamic>>> _carsFuture;
+  Set<int> _favoriteIds = {};
 
   @override
   void initState() {
     super.initState();
     _carsFuture = CarService.getCars();
+    _loadFavorites();
+  }
+
+  Future<void> _loadFavorites() async {
+    final ids = await FavoritesService.getFavoriteIds();
+    if (!mounted) return;
+    setState(() => _favoriteIds = ids);
+  }
+
+  Future<void> _toggleFavorite(int carId) async {
+    await FavoritesService.toggleFavorite(carId);
+    await _loadFavorites();
   }
 
   int _totalPagesFor(List cars) =>
@@ -95,17 +112,27 @@ class _HomePageState extends State<HomePage> {
                       const SizedBox(width: 8),
                       const MaatAutoLogo(width: 80),
                       const SizedBox(width: 8),
-                      Container(
-                        width: 32,
-                        height: 32,
-                        decoration: BoxDecoration(
-                          color: Colors.white10,
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: const Icon(
-                          Icons.person,
-                          color: Colors.white,
-                          size: 20,
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const ProfilePage(),
+                            ),
+                          );
+                        },
+                        child: Container(
+                          width: 32,
+                          height: 32,
+                          decoration: BoxDecoration(
+                            color: Colors.white10,
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: const Icon(
+                            Icons.person,
+                            color: Colors.white,
+                            size: 20,
+                          ),
                         ),
                       ),
                     ],
@@ -121,30 +148,37 @@ class _HomePageState extends State<HomePage> {
                     itemBuilder: (context, index) {
                       final car = pageCars[index];
 
+                      final id = car['id'] as int;
                       final brand = car['brand']?.toString() ?? '';
                       final model = car['model']?.toString() ?? '';
                       final title = '$brand $model'.trim();
 
                       final pricePerDay =
-                          (car['price'] ?? car['pricePerDay'] ?? 0).toString();
+                      (car['price'] ?? car['pricePerDay'] ?? 0).toString();
 
                       final fuel = car['fuel']?.toString() ?? '';
                       final body = car['body']?.toString() ?? '';
                       final nrOfSeats =
-                          (car['nrOfSeats'] ?? car['numberOfSeats'] ?? '')
-                              .toString();
-                      final modelYear = (car['modelYear'] ?? car['year'] ?? '')
+                      (car['nrOfSeats'] ?? car['numberOfSeats'] ?? '')
                           .toString();
+                      final modelYear =
+                      (car['modelYear'] ?? car['year'] ?? '').toString();
+                      final transmission =
+                      car['transmission']?.toString(); // optioneel
+                      final location = car['location']?.toString(); // optioneel
 
                       final pictureBase64 = car['picture'] as String?;
                       Uint8List? pictureBytes;
-                      if (pictureBase64 != null && pictureBase64.isNotEmpty) {
+                      if (pictureBase64 != null &&
+                          pictureBase64.isNotEmpty) {
                         try {
                           pictureBytes = base64Decode(pictureBase64);
                         } catch (_) {
                           pictureBytes = null;
                         }
                       }
+
+                      final isFavorite = _favoriteIds.contains(id);
 
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 16.0),
@@ -156,6 +190,28 @@ class _HomePageState extends State<HomePage> {
                           seats: nrOfSeats.isEmpty ? null : nrOfSeats,
                           modelYear: modelYear.isEmpty ? null : modelYear,
                           imageBytes: pictureBytes,
+                          isFavorite: isFavorite,
+                          onFavoriteTap: () => _toggleFavorite(id),
+                          onBookNow: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => CarDetailsPage(
+                                  id: id,
+                                  title: title.isEmpty ? 'Car' : title,
+                                  body: body,
+                                  fuel: fuel,
+                                  pricePerDay: pricePerDay,
+                                  seats: nrOfSeats.isEmpty ? null : nrOfSeats,
+                                  modelYear:
+                                  modelYear.isEmpty ? null : modelYear,
+                                  transmission: transmission,
+                                  location: location,
+                                  imageBytes: pictureBytes,
+                                ),
+                              ),
+                            );
+                          },
                         ),
                       );
                     },
@@ -170,10 +226,10 @@ class _HomePageState extends State<HomePage> {
                         onPressed: _currentPage == 0
                             ? null
                             : () {
-                                setState(() {
-                                  _currentPage--;
-                                });
-                              },
+                          setState(() {
+                            _currentPage--;
+                          });
+                        },
                         child: const Text('Previous'),
                       ),
                       const SizedBox(width: 16),
@@ -186,10 +242,10 @@ class _HomePageState extends State<HomePage> {
                         onPressed: _currentPage >= totalPages - 1
                             ? null
                             : () {
-                                setState(() {
-                                  _currentPage++;
-                                });
-                              },
+                          setState(() {
+                            _currentPage++;
+                          });
+                        },
                         child: const Text('Next'),
                       ),
                     ],
@@ -200,26 +256,51 @@ class _HomePageState extends State<HomePage> {
           },
         ),
       ),
+      // Footer
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: (index) {
-          setState(() => _currentIndex = index);
-          // TODO: Hier later echte tab-navigatie opzetten.
+          if (index == _currentIndex) return;
+          Widget page;
+          switch (index) {
+            case 0:
+              page = const HomePage();
+              break;
+            case 1:
+              page = const SearchPage();
+              break;
+            case 2:
+              page = const FavoritesPage();
+              break;
+            case 3:
+            default:
+              page = const ProfilePage();
+          }
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => page),
+          );
         },
         backgroundColor: const Color(0xFF1E1E1E),
         selectedItemColor: Colors.white,
         unselectedItemColor: Colors.white70,
         type: BottomNavigationBarType.fixed,
         items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home_filled), label: 'Home'),
-          BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Search'),
           BottomNavigationBarItem(
-            icon: Icon(Icons.favorite_border),
+            icon: Icon(Icons.home_filled),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.search),
+            label: 'Search',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.favorite),
             label: 'Favorites',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: 'Settings',
+            icon: Icon(Icons.person),
+            label: 'Profile',
           ),
         ],
       ),
@@ -228,7 +309,7 @@ class _HomePageState extends State<HomePage> {
 }
 
 /// Kaart voor één auto.
-/// Probeer deze widget 'dom' te houden zodat ik 'm ook op andere schermen kan hergebruiken.
+/// 'Dom' gehouden zodat hij op andere schermen hergebruikt kan worden.
 class CarCard extends StatelessWidget {
   final String title;
   final String pricePerDay;
@@ -237,6 +318,9 @@ class CarCard extends StatelessWidget {
   final String? seats;
   final String? modelYear;
   final Uint8List? imageBytes;
+  final bool isFavorite;
+  final VoidCallback? onFavoriteTap;
+  final VoidCallback? onBookNow;
 
   const CarCard({
     super.key,
@@ -247,6 +331,9 @@ class CarCard extends StatelessWidget {
     this.seats,
     this.modelYear,
     this.imageBytes,
+    this.isFavorite = false,
+    this.onFavoriteTap,
+    this.onBookNow,
   });
 
   @override
@@ -293,25 +380,45 @@ class CarCard extends StatelessWidget {
               Positioned(
                 top: 8,
                 right: 8,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.amber,
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Row(
-                    children: const [
-                      Icon(Icons.star, size: 14, color: Colors.white),
-                      SizedBox(width: 4),
-                      Text(
-                        '4.8',
-                        style: TextStyle(color: Colors.white, fontSize: 12),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
                       ),
-                    ],
-                  ),
+                      decoration: BoxDecoration(
+                        color: Colors.amber,
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Row(
+                        children: const [
+                          Icon(Icons.star, size: 14, color: Colors.white),
+                          SizedBox(width: 4),
+                          Text(
+                            '4.8',
+                            style: TextStyle(color: Colors.white, fontSize: 12),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    GestureDetector(
+                      onTap: onFavoriteTap,
+                      child: Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: Colors.black54,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Icon(
+                          isFavorite ? Icons.favorite : Icons.favorite_border,
+                          color: isFavorite ? Colors.red : Colors.white,
+                          size: 18,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
@@ -346,7 +453,8 @@ class CarCard extends StatelessWidget {
                         ),
                         const Text(
                           'per day',
-                          style: TextStyle(color: Colors.white70, fontSize: 12),
+                          style:
+                          TextStyle(color: Colors.white70, fontSize: 12),
                         ),
                       ],
                     ),
@@ -392,9 +500,7 @@ class CarCard extends StatelessWidget {
               width: double.infinity,
               height: 44,
               child: TextButton(
-                onPressed: () {
-                  // TODO: Later vervangen door navigatie naar detail of boekingsflow.
-                },
+                onPressed: onBookNow,
                 style: TextButton.styleFrom(
                   backgroundColor: Colors.white,
                   foregroundColor: Colors.black,
