@@ -61,6 +61,10 @@ flutter:
 
   assets:
     - assets/images/logo_automaat.svg
+  fonts:
+    - family: BHH Sans Bartleby
+      fonts:
+        - asset: assets/fonts/BBHSansBartle-Regular.ttf
 
 
   # To add assets to your application, add an assets section, like this:

@@ -95,6 +95,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         const Text(
                           'REGISTER',
                           style: TextStyle(
+                            fontFamily: 'BHH Sans Bartleby',
                             color: Colors.white,
                             fontSize: 22,
                             letterSpacing: 6,
