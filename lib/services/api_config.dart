@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class ApiConfig {
   // Automatisch detecteren van platform en juiste URL gebruiken
@@ -17,5 +18,9 @@ class ApiConfig {
     }
     // Fallback voor fysieke toestellen - vervang met je computer IP
     return 'http://localhost:8080';
+  }
+
+  static String get googleMapsApiKey {
+    return dotenv.env['GOOGLE_MAPS_API_KEY'] ?? '';
   }
 }

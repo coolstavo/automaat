@@ -8,7 +8,7 @@ import 'package:geolocator/geolocator.dart';
 
 import '../services/car_service.dart';
 import '../services/favorites_service.dart';
-import '../theme/logo_widget.dart';
+import '../services/maps_service.dart';
 import 'favorites.dart';
 import 'home.dart';
 import 'profile.dart';
@@ -37,6 +37,11 @@ class _MapPageState extends State<MapPage> with SingleTickerProviderStateMixin {
   
   late AnimationController _pulseController;
   late Animation<double> _pulseAnimation;
+
+  List<LatLng> _routePoints = [];
+  String? _routeDistance;
+  String? _routeDuration;
+  bool _isNavigating = false;
 
   @override
   void initState() {
@@ -205,6 +210,8 @@ class _MapPageState extends State<MapPage> with SingleTickerProviderStateMixin {
               modelYear: (car['modelYear'] ?? car['year'] ?? '').toString(),
               imageBytes: pictureBytes,
               isFavorite: isFavorite,
+              carLat: lat,
+              carLng: lng,
               onFavoriteTap: () => _toggleFavorite(id),
             );
           },
@@ -281,6 +288,69 @@ class _MapPageState extends State<MapPage> with SingleTickerProviderStateMixin {
     }
   }
 
+  Future<void> _startNavigation({
+    required double carLat,
+    required double carLng,
+    required String carTitle,
+  }) async {
+    if (_currentLocation == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Current location not available')),
+      );
+      return;
+    }
+
+    setState(() {
+      _isNavigating = true;
+      _routePoints = [];
+      _routeDistance = null;
+      _routeDuration = null;
+    });
+
+    final directions = await MapsService.getDirections(
+      origin: _currentLocation!,
+      destination: LatLng(carLat, carLng),
+    );
+
+    if (directions == null) {
+      if (mounted) {
+        setState(() => _isNavigating = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Could not calculate route')),
+        );
+      }
+      return;
+    }
+
+    if (mounted) {
+      setState(() {
+        _routePoints = directions['polyline'] as List<LatLng>;
+        _routeDistance = directions['distance'] as String?;
+        _routeDuration = directions['duration'] as String?;
+      });
+
+      // Zoom to fit the route
+      if (_routePoints.isNotEmpty) {
+        final bounds = LatLngBounds.fromPoints(_routePoints);
+        _mapController.fitCamera(
+          CameraFit.bounds(
+            bounds: bounds,
+            padding: const EdgeInsets.all(50),
+          ),
+        );
+      }
+    }
+  }
+
+  void _stopNavigation() {
+    setState(() {
+      _isNavigating = false;
+      _routePoints = [];
+      _routeDistance = null;
+      _routeDuration = null;
+    });
+  }
+
   void _showCarBottomSheet({
     required BuildContext context,
     required int id,
@@ -292,6 +362,8 @@ class _MapPageState extends State<MapPage> with SingleTickerProviderStateMixin {
     required String modelYear,
     required Uint8List? imageBytes,
     required bool isFavorite,
+    required double carLat,
+    required double carLng,
     required VoidCallback onFavoriteTap,
   }) {
     showModalBottomSheet(
@@ -354,9 +426,9 @@ class _MapPageState extends State<MapPage> with SingleTickerProviderStateMixin {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  Text(
+                  const Text(
                     'per day',
-                    style: const TextStyle(color: Colors.white70, fontSize: 12),
+                    style: TextStyle(color: Colors.white70, fontSize: 12),
                   ),
                   const Spacer(),
                   Text(
@@ -375,6 +447,11 @@ class _MapPageState extends State<MapPage> with SingleTickerProviderStateMixin {
                 child: TextButton(
                   onPressed: () {
                     Navigator.pop(context);
+                    _startNavigation(
+                      carLat: carLat,
+                      carLng: carLng,
+                      carTitle: title,
+                    );
                   },
                   style: TextButton.styleFrom(
                     backgroundColor: Colors.white,
@@ -383,7 +460,7 @@ class _MapPageState extends State<MapPage> with SingleTickerProviderStateMixin {
                       borderRadius: BorderRadius.circular(20),
                     ),
                   ),
-                  child: const Text('View Details'),
+                  child: const Text('Start Navigation'),
                 ),
               ),
             ],
@@ -436,8 +513,21 @@ class _MapPageState extends State<MapPage> with SingleTickerProviderStateMixin {
                     urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                     userAgentPackageName: 'com.automaat.app',
                   ),
+                  // Route polyline
+                  if (_routePoints.isNotEmpty)
+                    PolylineLayer(
+                      polylines: [
+                        Polyline(
+                          points: _routePoints,
+                          strokeWidth: 5.0,
+                          color: Colors.blue,
+                          borderStrokeWidth: 2.0,
+                          borderColor: Colors.white,
+                        ),
+                      ],
+                    ),
                   MarkerLayer(markers: markers),
-                  // Current location marker with pulse effect
+                  // Current location marker
                   if (_currentLocation != null)
                     MarkerLayer(
                       markers: [
@@ -495,115 +585,188 @@ class _MapPageState extends State<MapPage> with SingleTickerProviderStateMixin {
                     ),
                 ],
               ),
-              // Search bar header
-              Positioned(
-                top: 0,
-                left: 0,
-                right: 0,
-                child: SafeArea(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    child: Column(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 12,
-                          ),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF3D3D3D).withOpacity(0.95),
-                            borderRadius: BorderRadius.circular(12),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.3),
-                                blurRadius: 8,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
-                          ),
-                          child: Row(
-                            children: [
-                              const Icon(
-                                Icons.search,
-                                color: Colors.white54,
-                                size: 20,
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: TextField(
-                                  controller: _searchController,
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 15,
-                                  ),
-                                  cursorColor: Colors.white,
-                                  decoration: const InputDecoration(
-                                    hintText: 'Search by brand, model, or type...',
-                                    hintStyle: TextStyle(
-                                      color: Colors.white38,
-                                      fontSize: 15,
-                                    ),
-                                    border: InputBorder.none,
-                                    enabledBorder: InputBorder.none,
-                                    focusedBorder: InputBorder.none,
-                                    isDense: true,
-                                    contentPadding: EdgeInsets.zero,
-                                    filled: false,
-                                  ),
-                                  onChanged: _filterCars,
-                                ),
-                              ),
-                              if (_searchController.text.isNotEmpty)
-                                GestureDetector(
-                                  onTap: () {
-                                    _searchController.clear();
-                                    _filterCars('');
-                                  },
-                                  child: const Padding(
-                                    padding: EdgeInsets.only(left: 8),
-                                    child: Icon(
-                                      Icons.close,
-                                      color: Colors.white54,
-                                      size: 18,
-                                    ),
-                                  ),
-                                ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        Center(
-                          child: Container(
+              
+              // Search bar and car count - only show when NOT navigating
+              if (!_isNavigating)
+                Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  child: SafeArea(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      child: Column(
+                        children: [
+                          Container(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 16,
-                              vertical: 10,
+                              vertical: 12,
                             ),
                             decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(20),
+                              color: const Color(0xFF3D3D3D).withOpacity(0.95),
+                              borderRadius: BorderRadius.circular(12),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black.withOpacity(0.2),
-                                  blurRadius: 6,
+                                  color: Colors.black.withOpacity(0.3),
+                                  blurRadius: 8,
                                   offset: const Offset(0, 2),
                                 ),
                               ],
                             ),
-                            child: Text(
-                              '${_filteredCars.length} cars available nearby',
-                              style: const TextStyle(
-                                color: Colors.black,
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
+                            child: Row(
+                              children: [
+                                const Icon(
+                                  Icons.search,
+                                  color: Colors.white54,
+                                  size: 20,
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: TextField(
+                                    controller: _searchController,
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 15,
+                                    ),
+                                    cursorColor: Colors.white,
+                                    decoration: const InputDecoration(
+                                      hintText: 'Search by brand, model, or type...',
+                                      hintStyle: TextStyle(
+                                        color: Colors.white38,
+                                        fontSize: 15,
+                                      ),
+                                      border: InputBorder.none,
+                                      enabledBorder: InputBorder.none,
+                                      focusedBorder: InputBorder.none,
+                                      isDense: true,
+                                      contentPadding: EdgeInsets.zero,
+                                      filled: false,
+                                    ),
+                                    onChanged: _filterCars,
+                                  ),
+                                ),
+                                if (_searchController.text.isNotEmpty)
+                                  GestureDetector(
+                                    onTap: () {
+                                      _searchController.clear();
+                                      _filterCars('');
+                                    },
+                                    child: const Padding(
+                                      padding: EdgeInsets.only(left: 8),
+                                      child: Icon(
+                                        Icons.close,
+                                        color: Colors.white54,
+                                        size: 18,
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          Center(
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 10,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(20),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.2),
+                                    blurRadius: 6,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              child: Text(
+                                '${_filteredCars.length} cars available nearby',
+                                style: const TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ),
-              ),
+              
+              // Navigation info card - slimmer and rounder
+              if (_isNavigating && _routeDistance != null)
+                Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  child: SafeArea(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF3D3D3D).withOpacity(0.95),
+                          borderRadius: BorderRadius.circular(24),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.3),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(6),
+                              decoration: BoxDecoration(
+                                color: Colors.blue,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: const Icon(
+                                Icons.navigation,
+                                color: Colors.white,
+                                size: 16,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Text(
+                              _routeDistance ?? '',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Container(
+                              width: 1,
+                              height: 16,
+                              color: Colors.white24,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              _routeDuration ?? '',
+                              style: const TextStyle(
+                                color: Colors.white70,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              
               // My Location button
               Positioned(
                 bottom: 100,
@@ -636,6 +799,63 @@ class _MapPageState extends State<MapPage> with SingleTickerProviderStateMixin {
                   ),
                 ),
               ),
+              
+              // Stop Navigation button - at the bottom
+              if (_isNavigating)
+                Positioned(
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  child: Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF1E1E1E),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.3),
+                          blurRadius: 8,
+                          offset: const Offset(0, -2),
+                        ),
+                      ],
+                    ),
+                    child: SafeArea(
+                      top: false,
+                      child: SizedBox(
+                        width: double.infinity,
+                        height: 48,
+                        child: TextButton(
+                          onPressed: _stopNavigation,
+                          style: TextButton.styleFrom(
+                            backgroundColor: Colors.red,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(24),
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: const [
+                              Icon(
+                                Icons.close,
+                                color: Colors.white,
+                                size: 20,
+                              ),
+                              SizedBox(width: 8),
+                              Text(
+                                'Stop Navigation',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
             ],
           );
         },
