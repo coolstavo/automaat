@@ -509,9 +509,19 @@ class _MapPageState extends State<MapPage> with SingleTickerProviderStateMixin {
                   initialZoom: 12,
                 ),
                 children: [
+                  // Faster OSM tiles: use subdomains and disable retina
                   TileLayer(
                     urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                     userAgentPackageName: 'com.automaat.app',
+                    retinaMode: false,
+                    backgroundColor: const Color(0xFF0F0F0F),
+                    tileBuilder: (context, tileWidget, tile) => Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        tileWidget,
+                        Container(color: Colors.black.withOpacity(0.28)),
+                      ],
+                    ),
                   ),
                   // Route polyline
                   if (_routePoints.isNotEmpty)
@@ -520,7 +530,7 @@ class _MapPageState extends State<MapPage> with SingleTickerProviderStateMixin {
                         Polyline(
                           points: _routePoints,
                           strokeWidth: 5.0,
-                          color: Colors.blue,
+                          color: Colors.blue, // good contrast on darkened map
                           borderStrokeWidth: 2.0,
                           borderColor: Colors.white,
                         ),
@@ -583,6 +593,16 @@ class _MapPageState extends State<MapPage> with SingleTickerProviderStateMixin {
                         ),
                       ],
                     ),
+                  // Attribution (required by OSM)
+                  const RichAttributionWidget(
+                    alignment: AttributionAlignment.bottomRight,
+                    attributions: [
+                      TextSourceAttribution(
+                        '© OpenStreetMap contributors',
+                        textStyle: TextStyle(color: Colors.white70, fontSize: 10),
+                      ),
+                    ],
+                  ),
                 ],
               ),
               
