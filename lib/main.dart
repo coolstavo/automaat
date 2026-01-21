@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'theme/app_theme.dart';
 import 'pages/splash.dart';
 import 'pages/login.dart';
 import 'pages/register.dart';
 
 /// Entry‑point van de AutoMaat app.
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Load environment variables
+  await dotenv.load(fileName: ".env");
+  
   runApp(const AutoMaatApp());
 }
 

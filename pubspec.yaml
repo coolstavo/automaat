@@ -36,6 +36,11 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
   flutter_svg: ^2.0.9
+  flutter_map: ^6.1.0
+  latlong2: ^0.9.1
+  geolocator: ^12.0.0
+  flutter_dotenv: ^5.1.0
+  flutter_map_tile_caching: ^8.0.0
 
 dev_dependencies:
   flutter_test:
@@ -61,6 +66,11 @@ flutter:
 
   assets:
     - assets/images/logo_automaat.svg
+    - .env
+  fonts:
+    - family: BHH Sans Bartleby
+      fonts:
+        - asset: assets/fonts/BBHSansBartle-Regular.ttf
 
 
   # To add assets to your application, add an assets section, like this:

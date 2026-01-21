@@ -2,13 +2,14 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:automaat/pages/profile.dart';
-import 'package:automaat/pages/search.dart';
 import 'package:flutter/material.dart';
 
 import '../services/car_service.dart';
 import '../services/favorites_service.dart';
 import '../theme/logo_widget.dart';
 import 'home.dart';
+import 'map.dart';
+import 'search.dart';
 
 class FavoritesPage extends StatefulWidget {
   const FavoritesPage({super.key});
@@ -18,7 +19,7 @@ class FavoritesPage extends StatefulWidget {
 }
 
 class _FavoritesPageState extends State<FavoritesPage> {
-  int _currentIndex = 2;
+  int _currentIndex = 3;
   late Future<List<Map<String, dynamic>>> _carsFuture;
   Set<int> _favoriteIds = {};
 
@@ -47,125 +48,121 @@ class _FavoritesPageState extends State<FavoritesPage> {
         child: FutureBuilder<List<Map<String, dynamic>>>(
           future: _carsFuture,
           builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            }
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
 
-            if (snapshot.hasError || !snapshot.hasData) {
-              return const Center(
-                child: Text(
-                  'Kon favorieten niet laden',
-                  style: TextStyle(color: Colors.white),
-                ),
-              );
-            }
-
-            final cars = snapshot.data!;
-            final favoriteCars = cars.where((car) {
-              final id = car['id'] as int;
-              return _favoriteIds.contains(id);
-            }).toList();
-
-            if (favoriteCars.isEmpty) {
-              return const Center(
-                child: Text(
-                  'Nog geen favoriete auto\'s',
-                  style: TextStyle(color: Colors.white),
-                ),
-              );
-            }
-
-            return Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(24, 16, 24, 8),
-                  child: Row(
-                    children: const [
-                      Expanded(
-                        child: Text(
-                          'My Favorites',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 22,
-                            letterSpacing: 1.5,
-                          ),
-                        ),
-                      ),
-                      MaatAutoLogo(width: 80),
-                    ],
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      '${favoriteCars.length} cars saved',
-                      style: const TextStyle(
-                        color: Colors.white70,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Expanded(
-                  child: ListView.builder(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
-                    ),
-                    itemCount: favoriteCars.length,
-                    itemBuilder: (context, index) {
-                      final car = favoriteCars[index];
-                      final id = car['id'] as int;
-
-                      final brand = car['brand']?.toString() ?? '';
-                      final model = car['model']?.toString() ?? '';
-                      final title = '$brand $model'.trim();
-
-                      final pricePerDay =
-                      (car['price'] ?? car['pricePerDay'] ?? 0).toString();
-
-                      final fuel = car['fuel']?.toString() ?? '';
-                      final body = car['body']?.toString() ?? '';
-                      final nrOfSeats =
-                      (car['nrOfSeats'] ?? car['numberOfSeats'] ?? '')
-                          .toString();
-                      final modelYear =
-                      (car['modelYear'] ?? car['year'] ?? '').toString();
-
-                      final pictureBase64 = car['picture'] as String?;
-                      Uint8List? pictureBytes;
-                      if (pictureBase64 != null &&
-                          pictureBase64.isNotEmpty) {
-                        try {
-                          pictureBytes = base64Decode(pictureBase64);
-                        } catch (_) {
-                          pictureBytes = null;
-                        }
-                      }
-
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 16.0),
-                        child: CarCard(
-                          title: title.isEmpty ? 'Car' : title,
-                          pricePerDay: pricePerDay,
-                          body: body,
-                          fuel: fuel,
-                          seats: nrOfSeats.isEmpty ? null : nrOfSeats,
-                          modelYear: modelYear.isEmpty ? null : modelYear,
-                          imageBytes: pictureBytes,
-                          isFavorite: true,
-                          onFavoriteTap: () => _toggleFavorite(id),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ],
+          if (snapshot.hasError || !snapshot.hasData) {
+            return const Center(
+              child: Text(
+                'Kon favorieten niet laden',
+                style: TextStyle(color: Colors.white),
+              ),
             );
-          },
+          }
+
+          final cars = snapshot.data!;
+          final favoriteCars = cars.where((car) {
+            final id = car['id'] as int;
+            return _favoriteIds.contains(id);
+          }).toList();
+
+          if (favoriteCars.isEmpty) {
+            return const Center(
+              child: Text(
+                'Nog geen favoriete auto\'s',
+                style: TextStyle(color: Colors.white),
+              ),
+            );
+          }
+
+          return Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(24, 16, 24, 8),
+                child: Row(
+                  children: const [
+                    Expanded(
+                      child: Text(
+                        'My Favorites',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 22,
+                          letterSpacing: 1.5,
+                        ),
+                      ),
+                    ),
+                    MaatAutoLogo(width: 80),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    '${favoriteCars.length} cars saved',
+                    style: const TextStyle(color: Colors.white70, fontSize: 12),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Expanded(
+                child: ListView.builder(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  itemCount: favoriteCars.length,
+                  itemBuilder: (context, index) {
+                    final car = favoriteCars[index];
+                    final id = car['id'] as int;
+
+                    final brand = car['brand']?.toString() ?? '';
+                    final model = car['model']?.toString() ?? '';
+                    final title = '$brand $model'.trim();
+
+                    final pricePerDay =
+                        (car['price'] ?? car['pricePerDay'] ?? 0).toString();
+
+                    final fuel = car['fuel']?.toString() ?? '';
+                    final body = car['body']?.toString() ?? '';
+                    final nrOfSeats =
+                        (car['nrOfSeats'] ?? car['numberOfSeats'] ?? '')
+                            .toString();
+                    final modelYear = (car['modelYear'] ?? car['year'] ?? '')
+                        .toString();
+
+                    final pictureBase64 = car['picture'] as String?;
+                    Uint8List? pictureBytes;
+                    if (pictureBase64 != null && pictureBase64.isNotEmpty) {
+                      try {
+                        pictureBytes = base64Decode(pictureBase64);
+                      } catch (_) {
+                        pictureBytes = null;
+                      }
+                    }
+
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 16.0),
+                      child: CarCard(
+                        title: title.isEmpty ? 'Car' : title,
+                        pricePerDay: pricePerDay,
+                        body: body,
+                        fuel: fuel,
+                        seats: nrOfSeats.isEmpty ? null : nrOfSeats,
+                        modelYear: modelYear.isEmpty ? null : modelYear,
+                        imageBytes: pictureBytes,
+                        isFavorite: true,
+                        onFavoriteTap: () => _toggleFavorite(id),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          );
+        },
         ),
       ),
       bottomNavigationBar: BottomNavigationBar(
@@ -178,12 +175,15 @@ class _FavoritesPageState extends State<FavoritesPage> {
               page = const HomePage();
               break;
             case 1:
-              page = const SearchPage();
+              page = const MapPage();
               break;
             case 2:
-              page = const FavoritesPage();
+              page = const SearchPage();
               break;
             case 3:
+              page = const FavoritesPage();
+              break;
+            case 4:
             default:
               page = const ProfilePage();
           }
@@ -197,22 +197,14 @@ class _FavoritesPageState extends State<FavoritesPage> {
         unselectedItemColor: Colors.white70,
         type: BottomNavigationBarType.fixed,
         items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home_filled),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.search),
-            label: 'Search',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.home_filled), label: 'Home'),
+          BottomNavigationBarItem(icon: Icon(Icons.map), label: 'Map'),
+          BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Search'),
           BottomNavigationBarItem(
             icon: Icon(Icons.favorite),
             label: 'Favorites',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
         ],
       ),
     );

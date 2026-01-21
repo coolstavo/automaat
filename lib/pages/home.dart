@@ -8,6 +8,7 @@ import '../services/favorites_service.dart';
 import '../theme/logo_widget.dart';
 import 'car_details.dart';
 import 'favorites.dart';
+import 'map.dart';
 import 'profile.dart';
 import 'search.dart';
 
@@ -20,11 +21,8 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-// Per pagina max 10 auto's weergeven.
 class _HomePageState extends State<HomePage> {
   int _currentIndex = 0;
-  int _currentPage = 0;
-  static const int _pageSize = 10;
 
   late Future<List<Map<String, dynamic>>> _carsFuture;
   Set<int> _favoriteIds = {};
@@ -45,15 +43,6 @@ class _HomePageState extends State<HomePage> {
   Future<void> _toggleFavorite(int carId) async {
     await FavoritesService.toggleFavorite(carId);
     await _loadFavorites();
-  }
-
-  int _totalPagesFor(List cars) =>
-      (cars.length / _pageSize).ceil().clamp(1, 9999);
-
-  List<Map<String, dynamic>> _carsForPage(List<Map<String, dynamic>> cars) {
-    final start = _currentPage * _pageSize;
-    final end = (start + _pageSize).clamp(0, cars.length);
-    return cars.sublist(start, end);
   }
 
   @override
@@ -85,12 +74,6 @@ class _HomePageState extends State<HomePage> {
                 ),
               );
             }
-
-            final totalPages = _totalPagesFor(cars);
-            if (_currentPage >= totalPages) {
-              _currentPage = totalPages - 1;
-            }
-            final pageCars = _carsForPage(cars);
 
             return Column(
               children: [
@@ -144,9 +127,9 @@ class _HomePageState extends State<HomePage> {
                       horizontal: 16,
                       vertical: 8,
                     ),
-                    itemCount: pageCars.length,
+                    itemCount: cars.length,
                     itemBuilder: (context, index) {
-                      final car = pageCars[index];
+                      final car = cars[index];
 
                       final id = car['id'] as int;
                       final brand = car['brand']?.toString() ?? '';
@@ -154,23 +137,22 @@ class _HomePageState extends State<HomePage> {
                       final title = '$brand $model'.trim();
 
                       final pricePerDay =
-                      (car['price'] ?? car['pricePerDay'] ?? 0).toString();
+                          (car['price'] ?? car['pricePerDay'] ?? 0).toString();
 
                       final fuel = car['fuel']?.toString() ?? '';
                       final body = car['body']?.toString() ?? '';
                       final nrOfSeats =
-                      (car['nrOfSeats'] ?? car['numberOfSeats'] ?? '')
+                          (car['nrOfSeats'] ?? car['numberOfSeats'] ?? '')
+                              .toString();
+                      final modelYear = (car['modelYear'] ?? car['year'] ?? '')
                           .toString();
-                      final modelYear =
-                      (car['modelYear'] ?? car['year'] ?? '').toString();
-                      final transmission =
-                      car['transmission']?.toString(); // optioneel
+                      final transmission = car['transmission']
+                          ?.toString(); // optioneel
                       final location = car['location']?.toString(); // optioneel
 
                       final pictureBase64 = car['picture'] as String?;
                       Uint8List? pictureBytes;
-                      if (pictureBase64 != null &&
-                          pictureBase64.isNotEmpty) {
+                      if (pictureBase64 != null && pictureBase64.isNotEmpty) {
                         try {
                           pictureBytes = base64Decode(pictureBase64);
                         } catch (_) {
@@ -203,8 +185,9 @@ class _HomePageState extends State<HomePage> {
                                   fuel: fuel,
                                   pricePerDay: pricePerDay,
                                   seats: nrOfSeats.isEmpty ? null : nrOfSeats,
-                                  modelYear:
-                                  modelYear.isEmpty ? null : modelYear,
+                                  modelYear: modelYear.isEmpty
+                                      ? null
+                                      : modelYear,
                                   transmission: transmission,
                                   location: location,
                                   imageBytes: pictureBytes,
@@ -215,40 +198,6 @@ class _HomePageState extends State<HomePage> {
                         ),
                       );
                     },
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      TextButton(
-                        onPressed: _currentPage == 0
-                            ? null
-                            : () {
-                          setState(() {
-                            _currentPage--;
-                          });
-                        },
-                        child: const Text('Previous'),
-                      ),
-                      const SizedBox(width: 16),
-                      Text(
-                        'Page ${_currentPage + 1} / $totalPages',
-                        style: const TextStyle(color: Colors.white70),
-                      ),
-                      const SizedBox(width: 16),
-                      TextButton(
-                        onPressed: _currentPage >= totalPages - 1
-                            ? null
-                            : () {
-                          setState(() {
-                            _currentPage++;
-                          });
-                        },
-                        child: const Text('Next'),
-                      ),
-                    ],
                   ),
                 ),
               ],
@@ -267,12 +216,15 @@ class _HomePageState extends State<HomePage> {
               page = const HomePage();
               break;
             case 1:
-              page = const SearchPage();
+              page = const MapPage();
               break;
             case 2:
-              page = const FavoritesPage();
+              page = const SearchPage();
               break;
             case 3:
+              page = const FavoritesPage();
+              break;
+            case 4:
             default:
               page = const ProfilePage();
           }
@@ -286,22 +238,14 @@ class _HomePageState extends State<HomePage> {
         unselectedItemColor: Colors.white70,
         type: BottomNavigationBarType.fixed,
         items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home_filled),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.search),
-            label: 'Search',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.home_filled), label: 'Home'),
+          BottomNavigationBarItem(icon: Icon(Icons.map), label: 'Map'),
+          BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Search'),
           BottomNavigationBarItem(
             icon: Icon(Icons.favorite),
             label: 'Favorites',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
         ],
       ),
     );
@@ -453,8 +397,7 @@ class CarCard extends StatelessWidget {
                         ),
                         const Text(
                           'per day',
-                          style:
-                          TextStyle(color: Colors.white70, fontSize: 12),
+                          style: TextStyle(color: Colors.white70, fontSize: 12),
                         ),
                       ],
                     ),
