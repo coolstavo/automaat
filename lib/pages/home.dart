@@ -12,8 +12,6 @@ import 'map.dart';
 import 'profile.dart';
 import 'search.dart';
 
-/// Haalt data uit /api/cars.
-
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -22,7 +20,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  int _currentIndex = 0;
+  final int _currentIndex = 0;
 
   late Future<List<Map<String, dynamic>>> _carsFuture;
   Set<int> _favoriteIds = {};
@@ -30,7 +28,7 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    _carsFuture = CarService.getCars();
+    _carsFuture = _getAvailableCars();
     _loadFavorites();
   }
 
@@ -43,6 +41,35 @@ class _HomePageState extends State<HomePage> {
   Future<void> _toggleFavorite(int carId) async {
     await FavoritesService.toggleFavorite(carId);
     await _loadFavorites();
+  }
+
+  /// 🔥 FILTER: haal alleen auto's op die NIET actief geboekt zijn
+  Future<List<Map<String, dynamic>>> _getAvailableCars() async {
+    final allCars = await CarService.getCars();
+    final activeRentals = await CarService().getActiveRentals();
+
+    final now = DateTime.now();
+
+    final availableCars = allCars.where((car) {
+      final carId = car['id'];
+
+      final overlappingRental = activeRentals.any((rental) {
+        final rentalCarId = rental['car']?['id'];
+        final from = DateTime.tryParse(rental['fromDate'] ?? '');
+        final to = DateTime.tryParse(rental['toDate'] ?? '');
+
+        if (from == null || to == null) return false;
+
+        // Check of de huidige datum binnen de boekingsperiode valt
+        final overlaps = now.isBefore(to) && now.isAfter(from);
+
+        return rentalCarId == carId && overlaps;
+      });
+
+      return !overlappingRental;
+    }).toList();
+
+    return availableCars;
   }
 
   @override
@@ -69,7 +96,7 @@ class _HomePageState extends State<HomePage> {
             if (cars.isEmpty) {
               return const Center(
                 child: Text(
-                  'Geen auto\'s gevonden',
+                  'Geen beschikbare auto\'s',
                   style: TextStyle(color: Colors.white),
                 ),
               );
@@ -121,6 +148,7 @@ class _HomePageState extends State<HomePage> {
                     ],
                   ),
                 ),
+
                 Expanded(
                   child: ListView.builder(
                     padding: const EdgeInsets.symmetric(
@@ -137,18 +165,17 @@ class _HomePageState extends State<HomePage> {
                       final title = '$brand $model'.trim();
 
                       final pricePerDay =
-                          (car['price'] ?? car['pricePerDay'] ?? 0).toString();
+                      (car['price'] ?? car['pricePerDay'] ?? 0).toString();
 
                       final fuel = car['fuel']?.toString() ?? '';
                       final body = car['body']?.toString() ?? '';
                       final nrOfSeats =
-                          (car['nrOfSeats'] ?? car['numberOfSeats'] ?? '')
-                              .toString();
+                      (car['nrOfSeats'] ?? car['numberOfSeats'] ?? '')
+                          .toString();
                       final modelYear = (car['modelYear'] ?? car['year'] ?? '')
                           .toString();
-                      final transmission = car['transmission']
-                          ?.toString(); // optioneel
-                      final location = car['location']?.toString(); // optioneel
+                      final transmission = car['transmission']?.toString();
+                      final location = car['location']?.toString();
 
                       final pictureBase64 = car['picture'] as String?;
                       Uint8List? pictureBytes;
@@ -185,9 +212,8 @@ class _HomePageState extends State<HomePage> {
                                   fuel: fuel,
                                   pricePerDay: pricePerDay,
                                   seats: nrOfSeats.isEmpty ? null : nrOfSeats,
-                                  modelYear: modelYear.isEmpty
-                                      ? null
-                                      : modelYear,
+                                  modelYear:
+                                  modelYear.isEmpty ? null : modelYear,
                                   transmission: transmission,
                                   location: location,
                                   imageBytes: pictureBytes,
@@ -205,7 +231,7 @@ class _HomePageState extends State<HomePage> {
           },
         ),
       ),
-      // Footer
+
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: (index) {
@@ -251,9 +277,6 @@ class _HomePageState extends State<HomePage> {
     );
   }
 }
-
-/// Kaart voor één auto.
-/// 'Dom' gehouden zodat hij op andere schermen hergebruikt kan worden.
 class CarCard extends StatelessWidget {
   final String title;
   final String pricePerDay;
@@ -478,3 +501,4 @@ Widget _iconSpec({
     ],
   );
 }
+

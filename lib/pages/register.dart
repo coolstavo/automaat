@@ -16,11 +16,11 @@ class RegisterPage extends StatefulWidget {
 class _RegisterPageState extends State<RegisterPage> {
   final _formKey = GlobalKey<FormState>();
   final _firstNameController = TextEditingController();
-  final _lastNameController = TextEditingController();
-  final _usernameController = TextEditingController(); // ← nieuw
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
-  final _confirmController = TextEditingController();
+  final _lastNameController  = TextEditingController();
+  final _usernameController  = TextEditingController();
+  final _emailController     = TextEditingController();
+  final _passwordController  = TextEditingController();
+  final _confirmController   = TextEditingController();
 
   bool _loading = false;
   String? _error;

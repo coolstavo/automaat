@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'booking.dart';
 
 class CarDetailsPage extends StatelessWidget {
   final int id;
@@ -218,13 +219,13 @@ class CarDetailsPage extends StatelessWidget {
                       ),
                     ),
 
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 15),
 
-                    // Features (dummy voor nu)
+                    // Features
                     Container(
                       color: const Color(0xFF1C1C1C),
                       padding:
-                      const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                      const EdgeInsets.symmetric(horizontal: 93, vertical: 16),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -236,7 +237,7 @@ class CarDetailsPage extends StatelessWidget {
                               fontWeight: FontWeight.w600,
                             ),
                           ),
-                          const SizedBox(height: 12),
+                          const SizedBox(height: 15),
                           Wrap(
                             spacing: 8,
                             runSpacing: 8,
@@ -253,7 +254,7 @@ class CarDetailsPage extends StatelessWidget {
                       ),
                     ),
 
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 15),
 
                     // Location / Pickup
                     Container(
@@ -309,10 +310,16 @@ class CarDetailsPage extends StatelessWidget {
                 height: 48,
                 child: TextButton(
                   onPressed: () {
-                    // TODO: hier straks de echte boekingsflow starten
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Booking flow komt hier.'),
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => BookingPage(
+                          id: id,
+                          title: title,
+                          body: body.isEmpty ? 'Car' : body,
+                          pricePerDay: pricePerDay,
+                          imageBytes: imageBytes,
+                        ),
                       ),
                     );
                   },

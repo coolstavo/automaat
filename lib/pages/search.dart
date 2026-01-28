@@ -31,7 +31,7 @@ class _SearchPageState extends State<SearchPage> {
   static const _recentKeyPrefix = 'recent_searches_cars_';
   static const _maxRecent = 5;
 
-  int _currentIndex = 2;
+  final int _currentIndex = 2;
 
   // Favorites-state (per user geregeld in FavoritesService)
   Set<int> _favoriteIds = {};

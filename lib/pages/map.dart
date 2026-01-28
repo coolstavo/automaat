@@ -27,7 +27,7 @@ class _MapPageState extends State<MapPage> with SingleTickerProviderStateMixin {
   List<Marker> markers = [];
   List<Map<String, dynamic>> _allCars = [];
   List<Map<String, dynamic>> _filteredCars = [];
-  int _currentIndex = 1;
+  final int _currentIndex = 1;
   Set<int> _favoriteIds = {};
   bool _markersCreated = false;
   
