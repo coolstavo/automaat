@@ -4,7 +4,12 @@ import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
 import '../services/user_service.dart';
 import '../theme/logo_widget.dart';
-import '../widgets/bottom_nav_bar.dart';
+import 'damages.dart';
+import 'damage_report.dart';
+import 'favorites.dart';
+import 'home.dart';
+import 'map.dart';
+import 'rentals.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -57,7 +62,6 @@ class _ProfilePageState extends State<ProfilePage> {
 
           return Column(
             children: [
-              // Header met logo + profielinfo + stats (één blok, zoals de mockup)
               Container(
                 padding: const EdgeInsets.fromLTRB(24, 24, 24, 24),
                 color: const Color(0xFF1E1E1E),
@@ -116,17 +120,32 @@ class _ProfilePageState extends State<ProfilePage> {
                       title: 'My Bookings',
                       subtitle: 'View your rental history',
                       onTap: () {
-                        // TODO: navigatie naar bookings
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const MyBookingsPage(),
+                          ),
+                        );
                       },
                     ),
+
                     _profileItem(
-                      icon: Icons.credit_card,
-                      title: 'Payment Methods',
-                      subtitle: 'Manage cards and payments',
+                      icon: Icons.report_problem,
+                      title: 'Report Damage',
+                      subtitle: 'Submit a damage report with photo',
                       onTap: () {
-                        // TODO: navigatie naar payment methods
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => DamagesPage(
+                              carId: 1,
+                              rentalId: 1,
+                            ),
+                          ),
+                        );
                       },
                     ),
+
                     _profileItem(
                       icon: Icons.lock_outline,
                       title: 'Reset Password',
