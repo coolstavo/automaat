@@ -16,7 +16,6 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
 
   bool _loading = false;
   String? _error;
-  bool _emailSent = false;
 
   @override
   void dispose() {
@@ -48,7 +47,6 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
       if (!mounted) return;
 
       setState(() {
-        _emailSent = true;
         _loading = false;
       });
 

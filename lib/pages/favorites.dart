@@ -17,7 +17,7 @@ class FavoritesPage extends StatefulWidget {
 }
 
 class _FavoritesPageState extends State<FavoritesPage> {
-  int _currentIndex = 3;
+  final int _currentIndex = 3;
   late Future<List<Map<String, dynamic>>> _carsFuture;
   Set<int> _favoriteIds = {};
 

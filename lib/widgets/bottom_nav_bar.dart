@@ -38,7 +38,7 @@ class BottomNavBar extends StatelessWidget {
     Navigator.pushReplacement(
       context,
       PageRouteBuilder(
-        pageBuilder: (_, __, ___) => page,
+        pageBuilder: (context, animation, secondaryAnimation) => page,
         transitionDuration: Duration.zero,
         reverseTransitionDuration: Duration.zero,
       ),

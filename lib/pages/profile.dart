@@ -15,7 +15,7 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
   late Future<Map<String, dynamic>> _meFuture;
-  int _currentIndex = 4;
+  final int _currentIndex = 4;
 
   @override
   void initState() {
@@ -175,28 +175,6 @@ class _ProfilePageState extends State<ProfilePage> {
       // Zelfde footer als op Home, maar Profile geselecteerd
       bottomNavigationBar: BottomNavBar(currentIndex: _currentIndex),
   );
-  }
-
-  Widget _statItem({required String title, required String value}) {
-    return Expanded(
-      child: Column(
-        children: [
-          Text(
-            value,
-            style: const TextStyle(color: Colors.white, fontSize: 18),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            title.toUpperCase(),
-            style: const TextStyle(
-              color: Colors.white54,
-              fontSize: 11,
-              letterSpacing: 1.5,
-            ),
-          ),
-        ],
-      ),
-    );
   }
 
   Widget _profileItem({
