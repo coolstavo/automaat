@@ -1,6 +1,4 @@
 import 'package:automaat/pages/change_password.dart';
-import 'package:automaat/pages/forgot_password.dart';
-import 'package:automaat/pages/reset_password.dart';
 import 'package:flutter/material.dart';
 
 import '../services/auth_service.dart';
@@ -56,10 +54,6 @@ class _ProfilePageState extends State<ProfilePage> {
               .trim();
           final systemUser = me['systemUser'] as Map<String, dynamic>?;
           final email = (systemUser?['email'] ?? '').toString();
-
-          final tier = me['memberTier']?.toString() ?? 'Member';
-          final spent = me['totalSpent']?.toString() ?? '\$0';
-          final trips = me['tripCount']?.toString() ?? '0';
 
           return Column(
             children: [
@@ -203,10 +197,6 @@ class _ProfilePageState extends State<ProfilePage> {
         ],
       ),
     );
-  }
-
-  Widget _verticalDivider() {
-    return Container(width: 1, height: 32, color: Colors.white12);
   }
 
   Widget _profileItem({

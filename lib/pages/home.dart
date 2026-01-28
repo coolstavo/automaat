@@ -8,7 +8,6 @@ import '../services/favorites_service.dart';
 import '../theme/logo_widget.dart';
 import '../widgets/bottom_nav_bar.dart';
 import 'car_details.dart';
-import 'profile.dart';
 
 /// Haalt data uit /api/cars.
 /// 
