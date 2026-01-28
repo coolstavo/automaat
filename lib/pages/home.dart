@@ -6,17 +6,14 @@ import 'package:flutter/material.dart';
 import '../services/car_service.dart';
 import '../services/favorites_service.dart';
 import '../theme/logo_widget.dart';
+import '../widgets/bottom_nav_bar.dart';
 import 'car_details.dart';
-import 'favorites.dart';
-import 'map.dart';
 import 'profile.dart';
-import 'search.dart';
 
 /// Haalt data uit /api/cars.
-
+/// 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
-
   @override
   State<HomePage> createState() => _HomePageState();
 }
@@ -100,7 +97,7 @@ class _HomePageState extends State<HomePage> {
                           Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
-                              builder: (_) => const ProfilePage(),
+                              builder: (_) => ProfilePage(),
                             ),
                           );
                         },
@@ -206,48 +203,7 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
       // Footer
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: (index) {
-          if (index == _currentIndex) return;
-          Widget page;
-          switch (index) {
-            case 0:
-              page = const HomePage();
-              break;
-            case 1:
-              page = const MapPage();
-              break;
-            case 2:
-              page = const SearchPage();
-              break;
-            case 3:
-              page = const FavoritesPage();
-              break;
-            case 4:
-            default:
-              page = const ProfilePage();
-          }
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (_) => page),
-          );
-        },
-        backgroundColor: const Color(0xFF1E1E1E),
-        selectedItemColor: Colors.white,
-        unselectedItemColor: Colors.white70,
-        type: BottomNavigationBarType.fixed,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home_filled), label: 'Home'),
-          BottomNavigationBarItem(icon: Icon(Icons.map), label: 'Map'),
-          BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Search'),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.favorite),
-            label: 'Favorites',
-          ),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
-        ],
-      ),
+      bottomNavigationBar: BottomNavBar(currentIndex: _currentIndex),
     );
   }
 }

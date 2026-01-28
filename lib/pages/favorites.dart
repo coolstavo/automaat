@@ -1,15 +1,13 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:automaat/pages/profile.dart';
 import 'package:flutter/material.dart';
 
 import '../services/car_service.dart';
 import '../services/favorites_service.dart';
 import '../theme/logo_widget.dart';
-import 'home.dart';
-import 'map.dart';
-import 'search.dart';
+import '../widgets/bottom_nav_bar.dart';
+import 'home.dart' show CarCard;
 
 class FavoritesPage extends StatefulWidget {
   const FavoritesPage({super.key});
@@ -165,48 +163,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
         },
         ),
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: (index) {
-          if (index == _currentIndex) return;
-          Widget page;
-          switch (index) {
-            case 0:
-              page = const HomePage();
-              break;
-            case 1:
-              page = const MapPage();
-              break;
-            case 2:
-              page = const SearchPage();
-              break;
-            case 3:
-              page = const FavoritesPage();
-              break;
-            case 4:
-            default:
-              page = const ProfilePage();
-          }
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (_) => page),
-          );
-        },
-        backgroundColor: const Color(0xFF1E1E1E),
-        selectedItemColor: Colors.white,
-        unselectedItemColor: Colors.white70,
-        type: BottomNavigationBarType.fixed,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home_filled), label: 'Home'),
-          BottomNavigationBarItem(icon: Icon(Icons.map), label: 'Map'),
-          BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Search'),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.favorite),
-            label: 'Favorites',
-          ),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
-        ],
-      ),
+      bottomNavigationBar: BottomNavBar(currentIndex: _currentIndex),
     );
   }
 }
