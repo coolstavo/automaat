@@ -1,12 +1,12 @@
-import 'package:automaat/pages/search.dart';
+import 'package:automaat/pages/change_password.dart';
+import 'package:automaat/pages/forgot_password.dart';
+import 'package:automaat/pages/reset_password.dart';
 import 'package:flutter/material.dart';
 
 import '../services/auth_service.dart';
 import '../services/user_service.dart';
 import '../theme/logo_widget.dart';
-import 'favorites.dart';
-import 'home.dart';
-import 'map.dart';
+import '../widgets/bottom_nav_bar.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -107,28 +107,10 @@ class _ProfilePageState extends State<ProfilePage> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 20),
-                    Container(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF2A2A2A),
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Row(
-                        children: [
-                          _statItem(title: 'Spent', value: spent),
-                          _verticalDivider(),
-                          _statItem(title: 'Member', value: tier),
-                          _verticalDivider(),
-                          _statItem(title: 'Trips', value: trips),
-                        ],
-                      ),
-                    ),
                   ],
                 ),
               ),
 
-              const SizedBox(height: 16),
 
               // Menu-items
               Expanded(
@@ -152,32 +134,21 @@ class _ProfilePageState extends State<ProfilePage> {
                       },
                     ),
                     _profileItem(
-                      icon: Icons.notifications_none,
-                      title: 'Notifications',
-                      subtitle: 'Alerts and updates',
+                      icon: Icons.lock_outline,
+                      title: 'Reset Password',
+                      subtitle: 'Change your account password',
                       onTap: () {
-                        // TODO: notificatie-instellingen
-                      },
-                    ),
-                    _profileItem(
-                      icon: Icons.person_outline,
-                      title: 'Edit Profile',
-                      subtitle: 'Update personal information',
-                      onTap: () {
-                        // TODO: profiel bewerken
-                      },
-                    ),
-                    _profileItem(
-                      icon: Icons.settings_outlined,
-                      title: 'Settings',
-                      subtitle: 'App preferences',
-                      onTap: () {
-                        // TODO: app settings
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const ChangePasswordPage(),
+                          ),
+                        );
                       },
                     ),
                   ],
                 ),
-              ),
+              ),  
 
               // Logout-knop onderaan
               Padding(
@@ -208,48 +179,7 @@ class _ProfilePageState extends State<ProfilePage> {
       ),
 
       // Zelfde footer als op Home, maar Profile geselecteerd
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: (index) {
-          if (index == _currentIndex) return;
-          Widget page;
-          switch (index) {
-            case 0:
-              page = const HomePage();
-              break;
-            case 1:
-              page = const MapPage();
-              break;
-            case 2:
-              page = const SearchPage();
-              break;
-            case 3:
-              page = const FavoritesPage();
-              break;
-            case 4:
-            default:
-              page = const ProfilePage();
-          }
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (_) => page),
-          );
-        },
-        backgroundColor: const Color(0xFF1E1E1E),
-        selectedItemColor: Colors.white,
-        unselectedItemColor: Colors.white70,
-        type: BottomNavigationBarType.fixed,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home_filled), label: 'Home'),
-          BottomNavigationBarItem(icon: Icon(Icons.map), label: 'Map'),
-          BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Search'),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.favorite),
-            label: 'Favorites',
-          ),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
-        ],
-    ),
+      bottomNavigationBar: BottomNavBar(currentIndex: _currentIndex),
   );
   }
 

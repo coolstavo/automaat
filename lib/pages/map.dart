@@ -9,10 +9,7 @@ import 'package:geolocator/geolocator.dart';
 import '../services/car_service.dart';
 import '../services/favorites_service.dart';
 import '../services/maps_service.dart';
-import 'favorites.dart';
-import 'home.dart';
-import 'profile.dart';
-import 'search.dart';
+import '../widgets/bottom_nav_bar.dart';
 
 class MapPage extends StatefulWidget {
   const MapPage({super.key});
@@ -56,7 +53,7 @@ class _MapPageState extends State<MapPage> with SingleTickerProviderStateMixin {
       vsync: this,
     )..repeat(reverse: true);
     
-    _pulseAnimation = Tween<double>(begin: 0.8, end: 1.2).animate(
+    _pulseAnimation = Tween<double>(begin: 0.7, end: 1.4).animate(
       CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
     );
   }
@@ -509,17 +506,14 @@ class _MapPageState extends State<MapPage> with SingleTickerProviderStateMixin {
                   initialZoom: 12,
                 ),
                 children: [
-                  // Faster OSM tiles: use subdomains and disable retina
                   TileLayer(
                     urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                     userAgentPackageName: 'com.automaat.app',
                     retinaMode: false,
-                    backgroundColor: const Color(0xFF0F0F0F),
                     tileBuilder: (context, tileWidget, tile) => Stack(
                       fit: StackFit.expand,
                       children: [
-                        tileWidget,
-                        Container(color: Colors.black.withOpacity(0.28)),
+                        tileWidget
                       ],
                     ),
                   ),
@@ -530,7 +524,7 @@ class _MapPageState extends State<MapPage> with SingleTickerProviderStateMixin {
                         Polyline(
                           points: _routePoints,
                           strokeWidth: 5.0,
-                          color: Colors.blue, // good contrast on darkened map
+                          color: Colors.blue,
                           borderStrokeWidth: 2.0,
                           borderColor: Colors.white,
                         ),
@@ -555,7 +549,7 @@ class _MapPageState extends State<MapPage> with SingleTickerProviderStateMixin {
                                     width: 60 * _pulseAnimation.value,
                                     height: 60 * _pulseAnimation.value,
                                     decoration: BoxDecoration(
-                                      color: Colors.blue.withOpacity(0.1),
+                                      color: Colors.blue.withAlpha((255 * 0.1).round()),
                                       shape: BoxShape.circle,
                                     ),
                                   ),
@@ -563,7 +557,7 @@ class _MapPageState extends State<MapPage> with SingleTickerProviderStateMixin {
                                     width: 40,
                                     height: 40,
                                     decoration: BoxDecoration(
-                                      color: Colors.blue.withOpacity(0.3),
+                                      color: Colors.blue.withAlpha((255 * 0.3).round()),
                                       shape: BoxShape.circle,
                                     ),
                                   ),
@@ -579,7 +573,7 @@ class _MapPageState extends State<MapPage> with SingleTickerProviderStateMixin {
                                       ),
                                       boxShadow: [
                                         BoxShadow(
-                                          color: Colors.blue.withOpacity(0.5),
+                                          color: Colors.blue.withAlpha((255 * 0.5).round()),
                                           blurRadius: 8,
                                           spreadRadius: 2,
                                         ),
@@ -623,11 +617,11 @@ class _MapPageState extends State<MapPage> with SingleTickerProviderStateMixin {
                               vertical: 12,
                             ),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF3D3D3D).withOpacity(0.95),
+                              color: const Color(0xFF3D3D3D).withAlpha((255 * 0.95).round()),
                               borderRadius: BorderRadius.circular(12),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black.withOpacity(0.3),
+                                  color: Colors.black.withAlpha((255 * 0.3).round()),
                                   blurRadius: 8,
                                   offset: const Offset(0, 2),
                                 ),
@@ -695,7 +689,7 @@ class _MapPageState extends State<MapPage> with SingleTickerProviderStateMixin {
                                 borderRadius: BorderRadius.circular(20),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black.withOpacity(0.2),
+                                    color: Colors.black.withAlpha((255 * 0.2).round()),
                                     blurRadius: 6,
                                     offset: const Offset(0, 2),
                                   ),
@@ -732,11 +726,11 @@ class _MapPageState extends State<MapPage> with SingleTickerProviderStateMixin {
                           vertical: 12,
                         ),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF3D3D3D).withOpacity(0.95),
+                          color: const Color(0xFF3D3D3D).withAlpha((255 * 0.95).round()),
                           borderRadius: BorderRadius.circular(24),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.3),
+                              color: Colors.black.withAlpha((255 * 0.3).round()),
                               blurRadius: 8,
                               offset: const Offset(0, 2),
                             ),
@@ -800,11 +794,11 @@ class _MapPageState extends State<MapPage> with SingleTickerProviderStateMixin {
                       width: 56,
                       height: 56,
                       decoration: BoxDecoration(
-                        color: const Color(0xFF3D3D3D).withOpacity(0.95),
+                        color: const Color(0xFF3D3D3D).withAlpha((255 * 0.95).round()),
                         shape: BoxShape.circle,
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.3),
+                            color: Colors.black.withAlpha((255 * 0.3).round()),
                             blurRadius: 8,
                             offset: const Offset(0, 2),
                           ),
@@ -832,7 +826,7 @@ class _MapPageState extends State<MapPage> with SingleTickerProviderStateMixin {
                       color: const Color(0xFF1E1E1E),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.3),
+                          color: Colors.black.withAlpha((255 * 0.3).round()),
                           blurRadius: 8,
                           offset: const Offset(0, -2),
                         ),
@@ -880,60 +874,7 @@ class _MapPageState extends State<MapPage> with SingleTickerProviderStateMixin {
           );
         },
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: (index) {
-          if (index == _currentIndex) return;
-          Widget page;
-          switch (index) {
-            case 0:
-              page = const HomePage();
-              break;
-            case 1:
-              page = const MapPage();
-              break;
-            case 2:
-              page = const SearchPage();
-              break;
-            case 3:
-              page = const FavoritesPage();
-              break;
-            case 4:
-            default:
-              page = const ProfilePage();
-          }
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (_) => page),
-          );
-        },
-        backgroundColor: const Color(0xFF1E1E1E),
-        selectedItemColor: Colors.white,
-        unselectedItemColor: Colors.white70,
-        type: BottomNavigationBarType.fixed,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home_filled),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.map),
-            label: 'Map',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.search),
-            label: 'Search',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.favorite),
-            label: 'Favorites',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
-          ),
-        ],
-      ),
+      bottomNavigationBar: BottomNavBar(currentIndex: _currentIndex),
     );
   }
 }

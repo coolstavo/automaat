@@ -4,6 +4,7 @@ import '../theme/logo_widget.dart';
 import '../theme/constants.dart';
 import 'register.dart';
 import 'home.dart';
+import 'forgot_password.dart';
 
 /// Login-scherm dat praat met `/api/authenticate`.
 class LoginPage extends StatefulWidget {
@@ -135,6 +136,26 @@ class _LoginPageState extends State<LoginPage> {
                                 ),
                               )
                             : const Text('NEXT', style: nextTextStyle),
+                      ),
+                      const SizedBox(height: 16),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const ForgotPasswordPage(),
+                            ),
+                          );
+                        },
+                        child: const Text(
+                          'WACHTWOORD VERGETEN?',
+                          style: TextStyle(
+                            color: Colors.white70,
+                            fontSize: 12,
+                            letterSpacing: 2,
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
                       ),
                     ],
                   ),

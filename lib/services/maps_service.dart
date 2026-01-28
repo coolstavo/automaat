@@ -4,19 +4,14 @@ import 'package:latlong2/latlong.dart';
 import 'api_config.dart';
 
 class MapsService {
-  // Option 1: Google Maps (requires valid API key)
+
   static Future<Map<String, dynamic>?> getDirections({
     required LatLng origin,
     required LatLng destination,
   }) async {
-    // Try Google Maps first
-    try {
-      return await _getGoogleDirections(origin, destination);
-    } catch (e) {
-      print('Google Maps failed: $e');
-      print('Falling back to OpenStreetMap routing...');
-      return await _getOSRMDirections(origin, destination);
-    }
+
+    return await _getGoogleDirections(origin, destination);
+    
   }
 
   static Future<Map<String, dynamic>?> _getGoogleDirections(
@@ -61,53 +56,7 @@ class MapsService {
     };
   }
 
-  // Option 2: Free OSRM fallback (no API key needed)
-  static Future<Map<String, dynamic>?> _getOSRMDirections(
-    LatLng origin,
-    LatLng destination,
-  ) async {
-    final url = Uri.parse(
-      'https://router.project-osrm.org/route/v1/driving/'
-      '${origin.longitude},${origin.latitude};'
-      '${destination.longitude},${destination.latitude}'
-      '?overview=full&geometries=polyline',
-    );
-
-    try {
-      final response = await http.get(url);
-      
-      if (response.statusCode != 200) {
-        return null;
-      }
-
-      final data = jsonDecode(response.body) as Map<String, dynamic>;
-      
-      if (data['code'] != 'Ok') {
-        return null;
-      }
-
-      final routes = data['routes'] as List;
-      if (routes.isEmpty) return null;
-
-      final route = routes[0] as Map<String, dynamic>;
-      final polylinePoints = _decodePolyline(route['geometry'] as String);
-      
-      final distance = route['distance'] as num;
-      final duration = route['duration'] as num;
-
-      return {
-        'polyline': polylinePoints,
-        'distance': '${(distance / 1000).toStringAsFixed(1)} km',
-        'duration': '${(duration / 60).round()} min',
-        'distanceValue': distance.toInt(),
-        'durationValue': duration.toInt(),
-      };
-    } catch (e) {
-      print('OSRM error: $e');
-      return null;
-    }
-  }
-
+  // Decode a polyline string into a list of LatLng points
   static List<LatLng> _decodePolyline(String encoded) {
     List<LatLng> points = [];
     int index = 0;
