@@ -370,47 +370,55 @@ class _MapPageState extends State<MapPage> with SingleTickerProviderStateMixin {
       ),
       backgroundColor: const Color(0xFF2A2A2A),
       builder: (context) {
-        return Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          title,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              title,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              body,
+                              style: const TextStyle(
+                                color: Colors.white70,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ],
                         ),
-                        const SizedBox(height: 4),
-                        Text(
-                          body,
-                          style: const TextStyle(
-                            color: Colors.white70,
-                            fontSize: 12,
-                          ),
+                      ),
+                      GestureDetector(
+                        onTap: () async {
+                          await FavoritesService.toggleFavorite(id);
+                          final ids = await FavoritesService.getFavoriteIds();
+                          setState(() {
+                            isFavorite = ids.contains(id);
+                          });
+                        },
+                        child: Icon(
+                          isFavorite ? Icons.favorite : Icons.favorite_border,
+                          color: isFavorite ? Colors.red : Colors.white,
+                          size: 24,
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                  GestureDetector(
-                    onTap: onFavoriteTap,
-                    child: Icon(
-                      isFavorite ? Icons.favorite : Icons.favorite_border,
-                      color: isFavorite ? Colors.red : Colors.white,
-                      size: 24,
-                    ),
-                  ),
-                ],
-              ),
               const SizedBox(height: 12),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -461,7 +469,9 @@ class _MapPageState extends State<MapPage> with SingleTickerProviderStateMixin {
                 ),
               ),
             ],
-          ),
+              ),
+            );
+          },
         );
       },
     );
@@ -509,7 +519,7 @@ class _MapPageState extends State<MapPage> with SingleTickerProviderStateMixin {
                   TileLayer(
                     urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                     userAgentPackageName: 'com.automaat.app',
-                    retinaMode: false,
+                    retinaMode: true,
                     tileBuilder: (context, tileWidget, tile) => Stack(
                       fit: StackFit.expand,
                       children: [
@@ -789,6 +799,8 @@ class _MapPageState extends State<MapPage> with SingleTickerProviderStateMixin {
                   child: GestureDetector(
                     onTap: () async {
                       await _getCurrentLocation();
+                      // Reset map rotation to 0
+                      _mapController.rotate(0);
                     },
                     child: Container(
                       width: 56,
