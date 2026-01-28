@@ -193,22 +193,22 @@ class CarDetailsPage extends StatelessWidget {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              _specItem(
+                              SpecItem(
                                 icon: Icons.event_seat,
                                 label: 'Seats',
                                 value: seats ?? '-',
                               ),
-                              _specItem(
+                              SpecItem(
                                 icon: Icons.local_gas_station,
                                 label: 'Fuel',
                                 value: fuel,
                               ),
-                              _specItem(
+                              SpecItem(
                                 icon: Icons.settings,
                                 label: 'Transmission',
                                 value: transmission ?? 'Auto',
                               ),
-                              _specItem(
+                              SpecItem(
                                 icon: Icons.calendar_today_outlined,
                                 label: 'Year',
                                 value: modelYear ?? '-',
@@ -243,11 +243,11 @@ class CarDetailsPage extends StatelessWidget {
                             runSpacing: 8,
                             children: const [
                               // TODO: uit de database halen
-                              _featureChip('Insurance Included'),
-                              _featureChip('GPS Navigation'),
-                              _featureChip('Bluetooth'),
-                              _featureChip('Automatic Climate'),
-                              _featureChip('Keyless Entry'),
+                              FeatureChip('Insurance Included'),
+                              FeatureChip('GPS Navigation'),
+                              FeatureChip('Bluetooth'),
+                              FeatureChip('Automatic Climate'),
+                              FeatureChip('Keyless Entry'),
                             ],
                           ),
                         ],
@@ -347,12 +347,13 @@ class CarDetailsPage extends StatelessWidget {
   }
 }
 
-class _specItem extends StatelessWidget {
+class SpecItem extends StatelessWidget {
   final IconData icon;
   final String label;
   final String value;
 
-  const _specItem({
+  const SpecItem({
+    super.key,
     required this.icon,
     required this.label,
     required this.value,
@@ -378,10 +379,10 @@ class _specItem extends StatelessWidget {
   }
 }
 
-class _featureChip extends StatelessWidget {
+class FeatureChip extends StatelessWidget {
   final String label;
 
-  const _featureChip(this.label);
+  const FeatureChip(this.label, {super.key});
 
   @override
   Widget build(BuildContext context) {

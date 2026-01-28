@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'firebase_options.dart';
 import 'theme/app_theme.dart';
 import 'pages/splash.dart';
 import 'pages/login.dart';
@@ -8,6 +10,11 @@ import 'pages/register.dart';
 /// Entry‑point van de AutoMaat app.
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Initialize Firebase
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   
   // Load environment variables
   await dotenv.load(fileName: ".env");
