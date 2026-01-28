@@ -92,29 +92,6 @@ class _HomePageState extends State<HomePage> {
                       const SizedBox(width: 8),
                       const MaatAutoLogo(width: 80),
                       const SizedBox(width: 8),
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => ProfilePage(),
-                            ),
-                          );
-                        },
-                        child: Container(
-                          width: 32,
-                          height: 32,
-                          decoration: BoxDecoration(
-                            color: Colors.white10,
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          child: const Icon(
-                            Icons.person,
-                            color: Colors.white,
-                            size: 20,
-                          ),
-                        ),
-                      ),
                     ],
                   ),
                 ),

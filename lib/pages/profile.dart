@@ -1,4 +1,6 @@
-import 'package:automaat/pages/search.dart';
+import 'package:automaat/pages/change_password.dart';
+import 'package:automaat/pages/forgot_password.dart';
+import 'package:automaat/pages/reset_password.dart';
 import 'package:flutter/material.dart';
 
 import '../services/auth_service.dart';
@@ -105,28 +107,10 @@ class _ProfilePageState extends State<ProfilePage> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 20),
-                    Container(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF2A2A2A),
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Row(
-                        children: [
-                          _statItem(title: 'Spent', value: spent),
-                          _verticalDivider(),
-                          _statItem(title: 'Member', value: tier),
-                          _verticalDivider(),
-                          _statItem(title: 'Trips', value: trips),
-                        ],
-                      ),
-                    ),
                   ],
                 ),
               ),
 
-              const SizedBox(height: 16),
 
               // Menu-items
               Expanded(
@@ -150,32 +134,21 @@ class _ProfilePageState extends State<ProfilePage> {
                       },
                     ),
                     _profileItem(
-                      icon: Icons.notifications_none,
-                      title: 'Notifications',
-                      subtitle: 'Alerts and updates',
+                      icon: Icons.lock_outline,
+                      title: 'Reset Password',
+                      subtitle: 'Change your account password',
                       onTap: () {
-                        // TODO: notificatie-instellingen
-                      },
-                    ),
-                    _profileItem(
-                      icon: Icons.person_outline,
-                      title: 'Edit Profile',
-                      subtitle: 'Update personal information',
-                      onTap: () {
-                        // TODO: profiel bewerken
-                      },
-                    ),
-                    _profileItem(
-                      icon: Icons.settings_outlined,
-                      title: 'Settings',
-                      subtitle: 'App preferences',
-                      onTap: () {
-                        // TODO: app settings
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const ChangePasswordPage(),
+                          ),
+                        );
                       },
                     ),
                   ],
                 ),
-              ),
+              ),  
 
               // Logout-knop onderaan
               Padding(
