@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
 import '../services/user_service.dart';
 import '../theme/logo_widget.dart';
+import '../widgets/bottom_nav_bar.dart';
 import 'damages.dart';
 import 'damage_report.dart';
 import 'favorites.dart';
@@ -131,21 +132,17 @@ class _ProfilePageState extends State<ProfilePage> {
 
                     _profileItem(
                       icon: Icons.report_problem,
-                      title: 'Report Damage',
-                      subtitle: 'Submit a damage report with photo',
+                      title: 'My Damage Reports',
+                      subtitle: 'View all reported damages',
                       onTap: () {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => DamagesPage(
-                              carId: 1,
-                              rentalId: 1,
-                            ),
+                            builder: (_) => const DamagesPage(),
                           ),
                         );
                       },
                     ),
-
                     _profileItem(
                       icon: Icons.lock_outline,
                       title: 'Reset Password',

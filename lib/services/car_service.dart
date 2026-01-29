@@ -254,22 +254,61 @@ class CarService {
     return list.cast<Map<String, dynamic>>();
   }
 
-  // ------------------------------------------------------------
+// ------------------------------------------------------------
 // GET inspections for a specific rental
-// Returns a list of inspections (Map<String, dynamic>) for the given rentalId
-// Throws exception if request fails or JSON is invalid
 // ------------------------------------------------------------
   static Future<List<Map<String, dynamic>>> getInspectionsForRental(
       int rentalId) async {
-    final url = Uri.parse(
-        'https://jouw-backend.com/api/inspections?rentalId=$rentalId');
-    final response = await http.get(url);
+    final token = await AuthService.getToken();
+    if (token == null) throw Exception("Niet ingelogd");
 
-    if (response.statusCode == 200) {
-      final List<dynamic> data = jsonDecode(response.body);
-      return data.map((e) => e as Map<String, dynamic>).toList();
-    } else {
-      throw Exception('Failed to load inspections: ${response.statusCode}');
+    final uri = Uri.parse(
+      "${ApiConfig.baseUrl}/api/inspections?rentalId.equals=$rentalId",
+    );
+
+    final response = await http.get(
+      uri,
+      headers: {
+        "Authorization": "Bearer $token",
+        "Content-Type": "application/json",
+      },
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception(
+          "Kon inspecties niet ophalen: ${response.body}");
     }
+
+    final List<dynamic> data = jsonDecode(response.body);
+    return data.cast<Map<String, dynamic>>();
   }
+// ------------------------------------------------------------
+// GET inspections for logged-in user
+// ------------------------------------------------------------
+  static Future<List<Map<String, dynamic>>> getInspectionsForUser() async {
+    final token = await AuthService.getToken();
+    if (token == null) throw Exception("Niet ingelogd");
+
+    final uri = Uri.parse(
+      "${ApiConfig.baseUrl}/api/inspections?eagerload=true",
+    );
+
+    final response = await http.get(
+      uri,
+      headers: {
+        "Authorization": "Bearer $token",
+        "Content-Type": "application/json",
+      },
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception(
+        "Kon inspecties niet ophalen: ${response.body}",
+      );
+    }
+
+    final List<dynamic> data = jsonDecode(response.body);
+    return data.cast<Map<String, dynamic>>();
+  }
+
 }
