@@ -41,7 +41,7 @@ class _HomePageState extends State<HomePage> {
     await _loadFavorites();
   }
 
-  /// 🔥 FILTER: haal alleen auto's op die NIET actief geboekt zijn
+
   Future<List<Map<String, dynamic>>> _getAvailableCars() async {
     final allCars = await CarService.getCars();
     final activeRentals = await CarService().getActiveRentals();

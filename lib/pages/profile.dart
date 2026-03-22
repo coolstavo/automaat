@@ -4,11 +4,8 @@ import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
 import '../services/user_service.dart';
 import '../theme/logo_widget.dart';
+import '../widgets/bottom_nav_bar.dart';
 import 'damages.dart';
-import 'damage_report.dart';
-import 'favorites.dart';
-import 'home.dart';
-import 'map.dart';
 import 'rentals.dart';
 
 class ProfilePage extends StatefulWidget {

@@ -7,10 +7,12 @@ class ApiConfig {
   static String get baseUrl {
     if (kIsWeb) {
       return 'http://localhost:8080';
+      // return 'https://0ae5c43920ae.ngrok-free.app';
 
     } else if (Platform.isIOS) {
       // iOS simulator kan localhost gebruiken
       return 'http://localhost:8080';
+      // return 'https://0ae5c43920ae.ngrok-free.app';
       
     } else if (Platform.isAndroid) {
       // Android emulator heeft 10.0.2.2 nodig
